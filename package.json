@@ -1,0 +1,26 @@
+{
+  "name": "ost-sound-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/valevalorin/ost-sound-agent.git"
+  },
+  "author": "valevalorin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/valevalorin/ost-sound-agent/issues"
+  },
+  "homepage": "https://github.com/valevalorin/ost-sound-agent#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "eases": "^1.0.8",
+    "express": "^4.16.2",
+    "mplayer": "^2.1.0"
+  }
+}
