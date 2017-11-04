@@ -1,0 +1,29 @@
+{
+	"crossFade": {
+		"seconds": 2,
+		"framerate": 60
+	},
+	"transitionBuffer": 1.5,
+	"loadedPackages": [
+	],
+	"assignments": [
+		{
+			"processName": "chrome",
+			"package": "D:\\pokemon\\package.ostmanifest",
+			"track": "route_29.mp3"
+		},
+		{
+			"processName": "OSt",
+			"package": "D:\\pokemon\\package.ostmanifest",
+			"track": "olivine_city.mp3"
+		},
+		{
+			"processName": "short",
+			"package": "D:\\pokemon\\package.ostmanifest",
+			"track": "short.mp3"
+		}
+	],
+	"passThroughs": [
+		"DualMonitor"
+	]
+}

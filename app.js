@@ -4,18 +4,33 @@ var MPlayer = require('mplayer');
 var util = require('util');
 var crossFadeEasing = require('eases/cubic-out');
 var Config = require("./config.js");
+var fs = require('fs');
 
 var app = express();
 var config = Config.load();
-var player = new MPlayer();
+
+try {
+	var player = new MPlayer({mplayerPath: 'mplayer.exe'});
+} catch (ex) {
+	console.log("player init failed");
+}
+
 var manuallyStopped = false;
 var queuedAssignment = null;
 var currentAssignment = null;
 var transitionTimeout = null;
 
-function crossFade(){
-
+try {
+	fs.unlink('ost-sound-agent.log');
+} catch (ex) {
+	//lol i dunno
 }
+
+fs.writeFileSync('ost-sound-agent.log', 'Initializing Log\n', function () {});
+
+function log(msg){
+	fs.appendFile('ost-sound-agent.log', msg + "\n", function () {});
+};
 
 player.on('stop', function (status) {
 	if(!manuallyStopped) {
@@ -27,6 +42,8 @@ player.on('stop', function (status) {
 app.use(bodyParser.json());
 
 app.post('/process-changed', function (req, res) {
+	// log('Process Changed Request Received\n');
+	// log(JSON.stringify(req.body) + '\n');
 	if(!player.status.filename) {
 		if(config.assignmentsMap[req.body.processName].trackPath) {
 			player.openFile(config.assignmentsMap[req.body.processName].trackPath);
