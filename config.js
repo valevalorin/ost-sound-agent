@@ -10,7 +10,11 @@ function load() {
 	if(config.assignments) {
 		for (var i = config.assignments.length - 1; i >= 0; i--) {
 			var assignment = config.assignments[i];
-			assignment.trackPath = assignment.package.replace("package.ostmanifest", assignment.track).replace(/\\/g, "\\\\");
+			if(nnue(assignment.fullPath)) {
+				assignment.trackPath = assignment.trackPath;
+			} else {
+				assignment.trackPath = assignment.package.replace("package.ostmanifest", assignment.track).replace(/\\/g, "\\\\");
+			}
 			config.assignmentsMap[assignment.processName] = assignment;
 		}
 	}
@@ -23,6 +27,15 @@ function load() {
 	}
 
 	return config;
+}
+
+function nnue(value) {
+	if(value !== null && value !== undefined) {
+		if(typeof value == 'string') {
+			return value.length > 0;
+		}
+	}
+	return false;
 }
 
 module.exports.load = load;
