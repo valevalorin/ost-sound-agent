@@ -21,6 +21,6 @@
     "body-parser": "^1.18.2",
     "eases": "^1.0.8",
     "express": "^4.16.2",
-    "mplayer": "git+https://valevalorin@github.com/valevalorin/mplayer.git"
+    "mplayer": "../../mplayer"
   }
 }

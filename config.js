@@ -19,10 +19,10 @@ function load() {
 		}
 	}
 
-	config.passThroughsMap = {};
-	if(config.passThroughs) {
-		for (var i = config.passThroughs.length - 1; i >= 0; i--) {
-			config.passThroughsMap[config.passThroughs[i]] = true;
+	config.nonPassThroughsMap = {};
+	if(config.nonPassThroughs) {
+		for (var i = config.nonPassThroughs.length - 1; i >= 0; i--) {
+			config.nonPassThroughsMap[config.nonPassThroughs[i]] = true;
 		}
 	}
 
