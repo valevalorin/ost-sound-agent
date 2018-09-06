@@ -14,6 +14,12 @@ var currentAssignment = null;
 var transitionTimeout = null;
 var logFile = null;
 
+var consumedMap = {};
+for(var i = 0; i < config.assignments.length; i++) {
+	var agn = config.assignments[i];
+	consumedMap[agn.processName] = [];
+}
+
 try {
 	fs.unlink('ost-sound-agent.log');
 } catch (ex) {
@@ -39,6 +45,26 @@ function random(max) {
   return Math.floor(Math.random()*max);
 }
 
+function randomNonConsumed(processName, list) {
+	var consumed = consumedMap[processName];
+	var max = list.length - consumed.length;
+	if(max == 0) {
+		consumedMap[processName] = [];
+		return list[0];
+	}
+	var target = random(max);
+	var cursor = 0;
+	for(var i = 0; i < list.length; i++) {
+		if(!consumed.includes(list[i])) {
+			if(cursor == target) {
+				return list[i];
+			} else {
+				cursor++;
+			}
+		}
+	}
+}
+
 function createPlayer() {
 	try {
 		var p = new MPlayer({mplayerPath: 'mplayer.exe'});
@@ -46,14 +72,22 @@ function createPlayer() {
 		// Instead of doing this I could try using the 'loop' option available via the setOptions method (http://www.mplayerhq.hu/DOCS/tech/slave.txt for reference)
 		p.on('stop', function (status) {
 			if(!manuallyStopped) {
-				if(config.multiMode && config.multiMode.loop != 'single') {
+				if(config.multiMode && currentAssignment.tracks && config.multiMode.loop != 'single') {
 					var index = currentAssignment.tracks.indexOf(currentAssignment.trackPath);
-					var tentativeIndex = index + 1;
-					if(tentativeIndex > currentAssignment.tracks.length - 1) {
-						player.openFile(currentAssignment.tracks[tentativeIndex]);
+					var tentativeIndex;
+					if(config.multiMode.loop == 'sequential') {
+						tentativeIndex = index + 1;
+						if(tentativeIndex > currentAssignment.tracks.length - 1) {
+							tentativeIndex = 0;
+						}
 					} else {
-						player.openFile(currentAssignment.tracks[0]);
+						tentativeIndex = index;
+						while(index == tentativeIndex) {
+							tentativeIndex = random(currentAssignment.tracks.length);
+						}
 					}
+					currentAssignment.trackPath = currentAssignment.tracks[tentativeIndex]
+					player.openFile(currentAssignment.trackPath);
 				} else {
 					player.openFile(currentAssignment.trackPath);
 					if(currentAssignment.loopStart !== null && currentAssignment.loopStart !== undefined) {
@@ -103,7 +137,12 @@ try {
 		if(!player.status.filename) {
 			var agn = config.assignmentsMap[req.body.processName];
 			if(agn.tracks && config.multiMode) {
-				agn.trackPath = agn.tracks[random(agn.tracks.length)];
+				if(config.multiMode.shuffle) {
+					agn.trackPath = agn.tracks[random(agn.tracks.length)];
+				} else {
+					agn.trackPath = randomNonConsumed(agn.processName, agn.tracks);
+					consumedMap[agn.processName].push(agn.trackPath);
+				}
 			}
 
 			log("Going to play: " + agn.trackPath);
@@ -139,7 +178,12 @@ try {
 							log("Setting up for transition");
 							transitioningPlayer.volume(0);
 							if(config.multiMode && queuedAssignment.tracks) {
-								queuedAssignment.trackPath = queuedAssignment.tracks[random(queuedAssignment.tracks.length)];
+								if(config.multiMode.shuffle) {
+									queuedAssignment.trackPath = queuedAssignment.tracks[random(queuedAssignment.tracks.length)];
+								} else {
+									queuedAssignment.trackPath = randomNonConsumed(queuedAssignment.processName, queuedAssignment.tracks);
+								}
+								
 							}
 							transitioningPlayer.openFile(queuedAssignment.trackPath);
 						}
@@ -155,6 +199,7 @@ try {
 									player = transitioningPlayer;
 									transitioningPlayer = buffer;
 									if(queuedAssignment) {
+										consumedMap[queuedAssignment.processName].push(queuedAssignment.trackPath);
 										currentAssignment = queuedAssignment;
 										queuedAssignment = null;
 									}
