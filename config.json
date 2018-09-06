@@ -1,29 +1,32 @@
 {
 	"crossFade": {
-		"seconds": 2,
+		"seconds": 1,
 		"framerate": 60
 	},
-	"transitionBuffer": 1.5,
-	"loadedPackages": [
-	],
+	"transitionBuffer": 0.5,
+	"trackHome": "C:\\ost\\",
+	"multiMode": {
+		"shuffle": false,
+		"loop": "single"
+	},
 	"assignments": [
 		{
 			"processName": "chrome",
-			"package": "D:\\pokemon\\package.ostmanifest",
-			"track": "route_29.mp3"
+			"tracks": [
+				"cycling.mp3",
+				"trainer_battle_1.mp3"
+			]
 		},
 		{
 			"processName": "OSt",
-			"package": "D:\\pokemon\\package.ostmanifest",
-			"track": "olivine_city.mp3"
+			"track": "palette_town.mp3"
 		},
 		{
-			"processName": "short",
-			"package": "D:\\pokemon\\package.ostmanifest",
-			"track": "short.mp3"
+			"processName": "sublime_text",
+			"track": "lavender_town.mp3"
 		}
 	],
-	"passThroughs": [
-		"DualMonitor"
+	"nonPassThroughs": [
+		"devenv"
 	]
 }

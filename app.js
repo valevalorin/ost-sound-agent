@@ -35,6 +35,10 @@ function log(msg){
 	});
 };
 
+function random(max) {
+  return Math.floor(Math.random()*max);
+}
+
 function createPlayer() {
 	try {
 		var p = new MPlayer({mplayerPath: 'mplayer.exe'});
@@ -42,9 +46,19 @@ function createPlayer() {
 		// Instead of doing this I could try using the 'loop' option available via the setOptions method (http://www.mplayerhq.hu/DOCS/tech/slave.txt for reference)
 		p.on('stop', function (status) {
 			if(!manuallyStopped) {
-				player.openFile(currentAssignment.trackPath);
-				if(currentAssignment.loopStart !== null && currentAssignment.loopStart !== undefined) {
-					player.seek(currentAssignment.loopStart);
+				if(config.multiMode && config.multiMode.loop != 'single') {
+					var index = currentAssignment.tracks.indexOf(currentAssignment.trackPath);
+					var tentativeIndex = index + 1;
+					if(tentativeIndex > currentAssignment.tracks.length - 1) {
+						player.openFile(currentAssignment.tracks[tentativeIndex]);
+					} else {
+						player.openFile(currentAssignment.tracks[0]);
+					}
+				} else {
+					player.openFile(currentAssignment.trackPath);
+					if(currentAssignment.loopStart !== null && currentAssignment.loopStart !== undefined) {
+						player.seek(currentAssignment.loopStart);
+					}
 				}
 			}
 			manuallyStopped = false;
@@ -87,11 +101,14 @@ try {
 		}
 
 		if(!player.status.filename) {
-			if(config.assignmentsMap[req.body.processName].trackPath) {
-				log("Going to play: " + config.assignmentsMap[req.body.processName].trackPath);
-				player.openFile(config.assignmentsMap[req.body.processName].trackPath);
-				currentAssignment = config.assignmentsMap[req.body.processName];
+			var agn = config.assignmentsMap[req.body.processName];
+			if(agn.tracks && config.multiMode) {
+				agn.trackPath = agn.tracks[random(agn.tracks.length)];
 			}
+
+			log("Going to play: " + agn.trackPath);
+			player.openFile(agn.trackPath);
+			currentAssignment = agn;
 		} else {
 			if(!queuedAssignment || req.body.processName != queuedAssignment.processName) {
 				clearTimeout(transitionTimeout);
@@ -121,6 +138,9 @@ try {
 						if(!isNonPassThrough) {
 							log("Setting up for transition");
 							transitioningPlayer.volume(0);
+							if(config.multiMode && queuedAssignment.tracks) {
+								queuedAssignment.trackPath = queuedAssignment.tracks[random(queuedAssignment.tracks.length)];
+							}
 							transitioningPlayer.openFile(queuedAssignment.trackPath);
 						}
 						var interval = setInterval(function () {
