@@ -6,8 +6,8 @@
 	"transitionBuffer": 0.5,
 	"trackHome": "C:\\ost\\",
 	"multiMode": {
-		"shuffle": false,
-		"loop": "single"
+		"shuffle": "random, variety",
+		"loop": true
 	},
 	"assignments": [
 		{
