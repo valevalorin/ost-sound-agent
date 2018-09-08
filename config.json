@@ -13,8 +13,14 @@
 		{
 			"processName": "chrome",
 			"tracks": [
-				"cycling.mp3",
-				"trainer_battle_1.mp3"
+				{
+					"track": "cycling.mp3",
+					"loopStart": 3
+				},
+				{
+					"track": "trainer_battle_1.mp3",
+					"loopStart": 3
+				}
 			]
 		},
 		{

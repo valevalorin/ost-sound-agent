@@ -55,7 +55,7 @@ function randomNonConsumed(processName, list) {
 	var target = random(max);
 	var cursor = 0;
 	for(var i = 0; i < list.length; i++) {
-		if(!consumed.includes(list[i])) {
+		if(!consumed.includes(list[i].track)) {
 			if(cursor == target) {
 				return list[i];
 			} else {
@@ -79,6 +79,16 @@ function sequentialNonConsumed(processName, list) {
 	}
 }
 
+function populateAssignment(agn, track) {
+	agn.trackPath = track.track;
+	if(track.loopStart) {
+		agn.loopStart = loopStart;
+	}
+	if(track.loopEnd) {
+		agn.loopEnd = loopEnd;
+	}
+}
+
 function createPlayer() {
 	try {
 		var p = new MPlayer({mplayerPath: 'mplayer.exe'});
@@ -88,18 +98,19 @@ function createPlayer() {
 			if(!manuallyStopped) {
 				if(config.multiMode && currentAssignment.tracks && !config.multiMode.loop) {
 					var index = currentAssignment.tracks.indexOf(currentAssignment.trackPath);
-					var trackPath;
+					var track;
 					if(!config.multiMode.shuffle) {
-						trackPath = sequentialNonConsumed(currentAssignment.processName, currentAssignment.tracks);
+						track = sequentialNonConsumed(currentAssignment.processName, currentAssignment.tracks);
 					} else {
 						if(config.multiMode.shuffle == 'random') {
-							trackPath = currentAssignment.tracks[random(currentAssignment.tracks.length)];
+							track = currentAssignment.tracks[random(currentAssignment.tracks.length)];
 						} else if (config.multiMode.shuffle == 'variety') {
-							trackPath = randomNonConsumed(currentAssignment.processName, currentAssignment.tracks);
+							track = randomNonConsumed(currentAssignment.processName, currentAssignment.tracks);
 						}
 					}
-					currentAssignment.trackPath = trackPath;
+					populateAssignment(currentAssignment, track);
 					player.openFile(currentAssignment.trackPath);
+					consumedMap.push(currentAssignment.trackPath);
 				} else {
 					player.openFile(currentAssignment.trackPath);
 					if(currentAssignment.loopStart !== null && currentAssignment.loopStart !== undefined) {
@@ -153,13 +164,16 @@ try {
 			if(agn.tracks && config.multiMode) {
 				if(config.multiMode.shuffle) {
 					if(config.multiMode.shuffle == "random") {
-						agn.trackPath = agn.tracks[random(agn.tracks.length)];
+						var track = agn.tracks[random(agn.tracks.length)];
+						populateAssignment(agn, track);
 					} else if (config.multiMode.shuffle == "variety") {
-						agn.trackPath = randomNonConsumed(agn.processName, agn.tracks);
+						var track = randomNonConsumed(agn.processName, agn.tracks);
+						populateAssignment(agn, track);
 						consumedMap[agn.processName].push(agn.trackPath);
 					}
 				} else {
-					agn.trackPath = sequentialNonConsumed(agn.processName, agn.tracks);
+					var track = sequentialNonConsumed(agn.processName, agn.tracks);
+					populateAssignment(agn, track);
 					consumedMap[agn.processName].push(agn.trackPath);
 				}
 			}
@@ -198,11 +212,14 @@ try {
 							transitioningPlayer.volume(0);
 							if(config.multiMode && queuedAssignment.tracks) {
 								if(config.multiMode.shuffle && config.multiMode.shuffle == 'random') {
-									queuedAssignment.trackPath = queuedAssignment.tracks[random(queuedAssignment.tracks.length)];
+									var track = queuedAssignment.tracks[random(queuedAssignment.tracks.length)];
+									populateAssignment(queuedAssignment, track);
 								} else if(config.multiMode.shuffle && config.multiMode.shuffle == 'variety') {
-									queuedAssignment.trackPath = randomNonConsumed(queuedAssignment.processName, queuedAssignment.tracks);
+									var track = randomNonConsumed(queuedAssignment.processName, queuedAssignment.tracks);
+									populateAssignment(queuedAssignment, track);
 								} else {
-									queuedAssignment.trackPath = sequentialNonConsumed(queuedAssignment.processName, queuedAssignment.tracks);
+									var track = sequentialNonConsumed(queuedAssignment.processName, queuedAssignment.tracks);
+									populateAssignment(queuedAssignment, track);
 								}
 							}
 							transitioningPlayer.openFile(queuedAssignment.trackPath);
@@ -214,7 +231,6 @@ try {
 								player.stop();
 								// Weird but this should make the mplayer process stop and exit
 								if(!isNonPassThrough) {
-
 									var buffer = player;
 									player = transitioningPlayer;
 									transitioningPlayer = buffer;
