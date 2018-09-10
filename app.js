@@ -105,9 +105,10 @@ function createPlayer() {
 							track = randomNonConsumed(currentAssignment.processName, currentAssignment.tracks);
 						}
 					}
+					log(track);
 					populateAssignment(currentAssignment, track);
 					player.openFile(currentAssignment.trackPath);
-					consumedMap.push(currentAssignment.trackPath);
+					consumedMap[currentAssignment.processName].push(currentAssignment.trackPath);
 				} else {
 					player.openFile(currentAssignment.trackPath);
 					if(currentAssignment.loopStart !== null && currentAssignment.loopStart !== undefined) {
