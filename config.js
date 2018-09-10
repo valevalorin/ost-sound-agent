@@ -17,10 +17,15 @@ function load() {
 
 			if(config.multiMode && assignment.tracks) {
 				for(var j = 0; j < assignment.tracks.length; j++) {
-					var trackPath = assignment.tracks[j];
+					var track = assignment.tracks[j];
+					var trackPath = track.track;
 					trackPath = trackHome + trackPath;
 					trackPath = trackPath.replace(/\\/g, "\\\\");
-					assignment.tracks[j] = trackPath;
+					assignment.tracks[j] = {
+						track: trackPath,
+						loopStart: nnue(track.loopStart) ? track.loopStart : null,
+						loopEnd: nnue(track.loopEnd) ? track.loopEnd: null
+					};
 				}
 			} else {
 				if(nnue(assignment.fullPath)) {

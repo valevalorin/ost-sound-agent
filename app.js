@@ -73,10 +73,7 @@ function sequentialNonConsumed(processName, list) {
 		return list[0];
 	}
 	
-	var tentativeIndex = consumed.length;
-	if(tentativeIndex >= list.length - 1) {
-		return list[tentativeIndex];
-	}
+	return list[consumed.length];
 }
 
 function populateAssignment(agn, track) {
@@ -161,21 +158,26 @@ try {
 
 		if(!player.status.filename) {
 			var agn = config.assignmentsMap[req.body.processName];
+			log(JSON.stringify(agn));
+			var track;
 			if(agn.tracks && config.multiMode) {
 				if(config.multiMode.shuffle) {
 					if(config.multiMode.shuffle == "random") {
-						var track = agn.tracks[random(agn.tracks.length)];
+						track = agn.tracks[random(agn.tracks.length)];
 						populateAssignment(agn, track);
 					} else if (config.multiMode.shuffle == "variety") {
-						var track = randomNonConsumed(agn.processName, agn.tracks);
+						track = randomNonConsumed(agn.processName, agn.tracks);
 						populateAssignment(agn, track);
 						consumedMap[agn.processName].push(agn.trackPath);
 					}
 				} else {
-					var track = sequentialNonConsumed(agn.processName, agn.tracks);
+					track = sequentialNonConsumed(agn.processName, agn.tracks);
 					populateAssignment(agn, track);
 					consumedMap[agn.processName].push(agn.trackPath);
 				}
+			}
+			if(track) {
+				log(JSON.stringify(track));
 			}
 
 			log("Going to play: " + agn.trackPath);

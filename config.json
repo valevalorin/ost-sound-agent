@@ -6,30 +6,41 @@
 	"transitionBuffer": 0.5,
 	"trackHome": "C:\\ost\\",
 	"multiMode": {
-		"shuffle": "random, variety",
+		"shuffle": "random",
 		"loop": true
 	},
 	"assignments": [
 		{
-			"processName": "chrome",
+			"processName": "netbeans",
 			"tracks": [
 				{
-					"track": "cycling.mp3",
-					"loopStart": 3
+					"track": "cycling.mp3"
 				},
 				{
-					"track": "trainer_battle_1.mp3",
-					"loopStart": 3
+					"track": "trainer_battle_1.mp3"
+				},
+				{
+					"track": "bug_catching_contest.mp3"
 				}
 			]
 		},
 		{
 			"processName": "OSt",
-			"track": "palette_town.mp3"
+			"track": "lavender_town.mp3"
 		},
 		{
 			"processName": "sublime_text",
-			"track": "lavender_town.mp3"
+			"tracks": [
+				{
+					"track": "gyrados_lake.mp3"
+				},
+				{
+					"track": "casino.mp3"
+				},
+				{
+					"track": "national_park.mp3"
+				}
+			]
 		}
 	],
 	"nonPassThroughs": [
