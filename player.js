@@ -174,33 +174,37 @@ function crossFade() {
       }
     } else {
       clearInterval(interval);
-      manuallyStopped = true;
-      player.stop();
-
-      if(queuedAssignment) {
-        // There's actually a song to transition to so swap state around
-        var buffer = player;
-        player = transitioningPlayer;
-        transitioningPlayer = buffer;
-
-        consumeTrack(processName, queuedAssignment.trackPath);
-        currentAssignment = queuedAssignment;
-        
-      } else {
-        // We were given a non pass through so clear the state to be ready for the next process change
-        currentAssignment = null;
-        player.volume(100);
-      }
-
-      clearQueuedAssignment();
-      crossFading = false;
-
-      if(queuedDuringCrossFade !== null) {
-        queue(queuedDuringCrossFade);
-        queuedDuringCrossFade = null;
-      }
+      crossFadeComplete();
     }
   }, config.crossFade.intervalTime); 
+}
+
+function crossFadeComplete() {
+  manuallyStopped = true;
+  player.stop();
+
+  if(queuedAssignment) {
+    // There's actually a song to transition to so swap state around
+    var buffer = player;
+    player = transitioningPlayer;
+    transitioningPlayer = buffer;
+
+    consumeTrack(processName, queuedAssignment.trackPath);
+    currentAssignment = queuedAssignment;
+    
+  } else {
+    // We were given a non pass through so clear the state to be ready for the next process change
+    currentAssignment = null;
+    player.volume(100);
+  }
+
+  clearQueuedAssignment();
+  crossFading = false;
+
+  if(queuedDuringCrossFade !== null) {
+    queue(queuedDuringCrossFade);
+    queuedDuringCrossFade = null;
+  }
 }
 
 function isCurrentlyPlaying(processName) {
