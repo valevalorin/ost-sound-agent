@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "properties": {
+    "crossFade": {
+      "description": "Controls crossfading between tracks.",
+      "type": "object",
+      "properties": {
+        "seconds": {
+        	"description": "How long the crossfading period is.",
+        	"type": "numeric"
+      	},
+      	"frameRate": {
+        	"description": "How many times over the course of the crossfading period the volume is adjusted. Higher = smoother.",
+        	"type": "numeric"
+      	}
+    	}
+    },
+    "transitionBuffer": {
+      "description": "Length of time it takes for a process change to 'stick'. Prevents tracks from restarting if you switch to a process then switch back quickly.",
+      "type": "numeric"
+    },
+    "trackHome": {
+      "description": "Convenience property that holds a path to the directory where the tracks to be played are stored.",
+      "type": "string"
+    },
+    "multiMode": {
+      "description": "Holds properties related to assigning multiple different tracks to a single process. Must exist for multiple track assignments to function.",
+      "type": "object",
+      "properties": {
+      	"shuffle": {
+      		"description": "Determines the order in which tracks play. 'random' means true random (repeats possible). 'variety' means it will cycle through all assigned tracks in a random order (but not repeat until all tracks have played at least once). Any other 'non-truthy' value evaluates to 'sequential' or 'non-shuffled' play.",
+      		"type": {
+      			"enum": [
+      				"random",
+    					"variety",
+              false,
+    					null
+      			]
+      		}
+      	},
+      	"loop": {
+      		"description": "Determines whether or not after a track completes if it will loop or if it will change to another assigned track (based on 'shuffle' property above).",
+      		"type": "boolean"
+      	}
+    	}
+    },
+    "assignments": {
+      "description": "Meat and potatoes property. Contains a list of process-track(s) pairings that determines what track plays when a process is active.",
+      "type": "array",
+      "items": {
+      	"type": {
+      		"title": "assignment",
+      		"description": "A pairing of a process to one of more tracks.",
+      		"type": "object",
+      		"properties": {
+      			"processName": {
+      				"description": "Name of the process you want to associate (without the extension)",
+      				"type": "string",
+      				"example": "sublime_text"
+      			},
+      			"track": {
+      				"id": "track-schema",
+      				"description": "Contains information specific to a single track like where it lives and how it loops.",
+      				"type": "object",
+      				"properties": {
+      					"track": {
+      						"description": "File name (including extension) of the track to be played. 'trackHome' will be prepended to this value to form a full path.",
+      						"type": "string"
+      					},
+      					"fullPath": {
+      						"description": "Full path of the track to be played.",
+      						"type": "string"
+      					},
+      					"loopStart": {
+      						"description": "Numeric value that determines where a track will begin when it is looped.",
+      						"type": "numeric"
+      					},
+      					"loopEnd": {
+      						"description": "Numeric value that determines where a track will end when it is looped.",
+      						"type": "numeric"
+      					}
+      				}
+      			},
+      			"tracks": {
+      				"description": "A list of tracks to associate to the process. The order in which they are played is determined by 'multiMode' top-level property. Will not be respected if 'multiMode' property is absent at the top level.",
+      				"type": "array",
+      				"items": {
+      					"type": {"$ref": "#track-schema"}
+      				}
+      			}
+      		}
+      	}
+    	}
+    },
+    "nonPassThroughs": {
+      "description": "List of process names (without extensions) that will cause the player to cease playing music when received as part of a 'process-changed' request.",
+      "type": "array",
+      "items": {
+      	"type": "string"
+    	}
+    }
+  },
+  "required": [ "crossFade", "transitionBuffer", "assignments"]
+}
