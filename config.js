@@ -1,4 +1,4 @@
-var fs = require('fs');
+const fs = require('fs');
 
 function load() {
 	var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
