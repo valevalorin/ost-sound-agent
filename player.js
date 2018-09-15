@@ -8,15 +8,14 @@ const Logger = require('./logger.js');
 
 // State
 
-const app = express();
 var config = Config.load();
 var manuallyStopped = false;
 var queuedAssignment = null;
 var currentAssignment = null;
 var transitionTimeout = null;
 var logFile = null;
-var player = createPlayer();
-var transitioningPlayer = createPlayer();
+var player = null;
+var transitioningPlayer = null;
 var crossFading = false;
 var queuedDuringCrossFade = null;
 
@@ -86,10 +85,14 @@ function queue(processName) {
 
   if(currentAssignment === null) {
     // Nothing is currently playing so just fire away
-    var track = getNextTrack(currentAssignment);
-    populateCurrentTrack(currentAssignment, track);
-    player.openFile(currentAssignment.currentTrack.trackPath);
-    consumeTrack(processName, currentAssignment.currentTrack.trackPath);
+    var assignment = config.assignmentsMap[processName];
+    if(assignment) {
+      currentAssignment = assignment;
+      var track = getNextTrack(currentAssignment);
+      populateCurrentTrack(currentAssignment, track);
+      player.openFile(currentAssignment.currentTrack.trackPath);
+      consumeTrack(processName, currentAssignment.currentTrack.trackPath);
+    }
   } else {
     // Something is currently playing, determine if track is queueable
 
@@ -104,6 +107,9 @@ function queue(processName) {
         clearQueuedAssignment();
         transition(processName);
       }
+    } else {
+      // Queued assignment is null, queue it up
+      transition(processName);
     }
   }
 }
@@ -120,6 +126,7 @@ function transition(processName) {
 
   queuedAssignment = config.assignmentsMap[processName];
   populateCurrentTrack(queuedAssignment, getNextTrack(queuedAssignment));
+  Logger.log(queuedAssignment);
   var isPassThrough = queuedAssignment === null && !config.nonPassThroughsMap[processName];
 
   // If the process is a passthrough, leave the current player alone other start crossfading between players
@@ -147,7 +154,8 @@ function crossFade() {
     transitioningPlayer.volume(0);
     transitioningPlayer.openFile(queuedAssignment.currentTrack.trackPath);
   }
-
+  var intervalCounter = 0;
+  var maxTime = config.crossFade.intervalTime * config.crossFade.intervalLoops;
   // This interval updates the volume of the current player and the transitioning player (every config.crossFade.intervalTime) to create the cross fade effect
   var interval = setInterval(function () {
     if(intervalCounter < config.crossFade.intervalLoops) {
@@ -161,6 +169,7 @@ function crossFade() {
 
       // Update volume of transitioning player
       if(queuedAssignment) {
+        // Gradually increase volume to 100 from a minimum value
         var mod = intervalCounter - 10;
         if(mod < 0) {
           mod = 0;
@@ -170,7 +179,7 @@ function crossFade() {
         if(volume > 1.0) {
           volume = 1.0;
         }
-        transitioningPlayer.volume(volume);
+        transitioningPlayer.volume(volume * 100);
       }
     } else {
       clearInterval(interval);
@@ -189,9 +198,8 @@ function crossFadeComplete() {
     player = transitioningPlayer;
     transitioningPlayer = buffer;
 
-    consumeTrack(processName, queuedAssignment.trackPath);
+    consumeTrack(queuedAssignment.processName, queuedAssignment.currentTrack.trackPath);
     currentAssignment = queuedAssignment;
-    
   } else {
     // We were given a non pass through so clear the state to be ready for the next process change
     currentAssignment = null;
@@ -201,6 +209,7 @@ function crossFadeComplete() {
   clearQueuedAssignment();
   crossFading = false;
 
+  // It's possible we received some requests while cross fading, if so try to queue only the most recent one
   if(queuedDuringCrossFade !== null) {
     queue(queuedDuringCrossFade);
     queuedDuringCrossFade = null;
@@ -226,7 +235,7 @@ function getNextTrack(assignment) {
     } else if (config.multiMode.shuffle === 'variety') {
       return getRandomNonConsumedTrack(assignment.processName, assignment.tracks);
     } else {
-      return getSequentialTrack(assignemtn.processName, assignment.tracks);
+      return getSequentialTrack(assignment.processName, assignment.tracks);
     }
   }
 }

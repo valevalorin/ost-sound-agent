@@ -2,8 +2,12 @@ const fs = require('fs');
 const moment = require('moment');
 const formatString = 'YYYY-MM-DD:HH:mm:ss';
 
-function log(msg) {
-  var logString = '\n[' + moment().format(formatString) + ']: ';
+function log(msg, appendToExistingLine) {
+  var logString = '';
+  if(!appendToExistingLine) {
+    logString = logString + '\n';
+  }
+  var logString = logString + '[' + moment().format(formatString) + ']: ';
   if(typeof msg === 'object' || typeof msg === 'array') {
     try {
       logString = logString + JSON.stringify(msg, null, 2);
@@ -29,7 +33,7 @@ try {
 
 fs.open('ost-sound-agent.log', 'w', function (err, fd) {
   logFile = fd;
-  log('Log Initialized');
+  log('Log Initialized', true);
 });
 
 module.exports = {
