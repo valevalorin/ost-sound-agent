@@ -22,6 +22,6 @@
     "eases": "^1.0.8",
     "express": "^4.16.2",
     "moment": "^2.22.2",
-    "mplayer": "../../mplayer"
+    "mplayer": "https://github.com/valevalorin/mplayer.git"
   }
 }
